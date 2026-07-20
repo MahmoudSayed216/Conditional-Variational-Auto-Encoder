@@ -253,6 +253,10 @@ def train(cfg):
     perceptual_loss_fn = VGGPerceptualLoss(layer_indices=cfg["LOSS"]["VGG_LAYER_INDICES"]).to(device)
     discriminator = PatchDiscriminator().to(device)
 
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Model parameters: {total_params:,} total | {trainable_params:,} trainable")
+
     # ---- Optimizers ----
     betas = tuple(cfg["TRAINING"]["ADAM_BETAS"])
     model_optimizer = torch.optim.Adam(model.parameters(), lr=cfg["TRAINING"]["LR"], betas=betas)

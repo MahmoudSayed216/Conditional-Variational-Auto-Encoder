@@ -26,7 +26,7 @@ DATA:
 ## TRAINING
 ## ============================================================
 TRAINING:
-  EPOCHS: 70
+  EPOCHS: 90
   LR: 0.0002
   DISCRIMINATOR_LR: 0.0002
   OPTIMIZER: "adam"
