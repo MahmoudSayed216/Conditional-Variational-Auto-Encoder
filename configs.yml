@@ -1,0 +1,70 @@
+## ============================================================
+## MODEL / ARCHITECTURE PARAMETERS
+## ============================================================
+MODEL:
+  CLASS_EMBEDDING_DIM: 256
+  NUM_CLASSES: 10
+  IMAGE_SIDE_LENGTH: 32
+  CHANNELS_PER_LEVEL: [128, 256, 256, 512]   # [c1, c2, c3, c4] channel widths per resolution
+  NUM_GROUPS: 32
+  LATENT_CHANNELS: 16          # latent spatial map is (LATENT_CHANNELS, H/8, W/8) -- 16x4x4 for 32x32 images
+
+## ============================================================
+## DATA
+## ============================================================
+DATA:
+  # Points at /kaggle/input rather than the exact dataset-slug subfolder --
+  # CIFAR10Dataset auto-detects whichever attached dataset directly contains
+  # a 'cifar-10-batches-py' folder (e.g. /kaggle/input/cifar10-python/cifar-10-batches-py).
+  # Running locally instead? Point this at your own data dir and set DOWNLOAD: true.
+  DATA_DIR: "/kaggle/input/datasets/pankrzysiu/cifar10-python"
+  DOWNLOAD: false               # Kaggle input mounts are read-only and already contain the data
+  NUM_WORKERS: 4
+  BATCH_SIZE: 48
+
+## ============================================================
+## TRAINING
+## ============================================================
+TRAINING:
+  EPOCHS: 70
+  LR: 0.0002
+  DISCRIMINATOR_LR: 0.0002
+  OPTIMIZER: "adam"
+  ADAM_BETAS: [0.5, 0.999]
+  GRAD_CLIP_NORM: 1.0
+  DEVICE: "cuda"                 # falls back to cpu automatically if unavailable
+  SEED: 46
+  LOG_EVERY_N_STEPS: 50
+  CHECKPOINT_DIR: "./checkpoints"
+  CHECKPOINT_EVERY_N_EPOCHS: 10
+
+## ============================================================
+## PROGRESSIVE LOSS SCHEDULE
+## Phase 1 [epoch 1 .. PHASE1_END_EPOCH]                -> reconstruction + KL only
+## Phase 2 [PHASE1_END_EPOCH+1 .. PHASE2_END_EPOCH]     -> + perceptual
+## Phase 3 [PHASE2_END_EPOCH+1 .. EPOCHS]               -> + adversarial
+## ============================================================
+LOSS:
+  PHASE1_END_EPOCH: 23
+  PHASE2_END_EPOCH: 46
+  KL_WEIGHT: 0.001              # weight on the KL term added to the reconstruction loss; tune to taste
+  PERCEPTUAL_WEIGHT: 0.1
+  ADVERSARIAL_WEIGHT: 0.05
+  VGG_LAYER_INDICES: [3, 8, 15, 22]   # relu1_2, relu2_2, relu3_3, relu4_3 in torchvision vgg16.features
+
+## ============================================================
+## FIXED-LATENT QUALITATIVE SAMPLING (every epoch)
+## ============================================================
+SAMPLING:
+  SAMPLE_EVERY_N_EPOCHS: 1
+  NUM_FIXED_SAMPLES: 30          # cycles through classes 0..9 -- 30 = 3 samples per class
+  SAMPLES_DIR: "./samples"
+
+## ============================================================
+## EVALUATION (FID / Inception Score)
+## ============================================================
+EVAL:
+  COMPUTE_FID_IS: true
+  FID_EVERY_N_EPOCHS: 5          # periodic, cheap-ish tracking estimate
+  FID_NUM_SAMPLES: 1000          # sample count used for the periodic estimate
+  FINAL_FID_NUM_SAMPLES: 5000   # sample count used for the final, reported number
