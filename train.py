@@ -12,6 +12,7 @@ At the end of training: computes a final, larger-sample-count FID/IS.
 """
 
 import os
+import time
 
 # Silence tqdm progress bars globally (e.g. the VGG16 pretrained-weights
 # download inside VGGPerceptualLoss) -- must be set before torch/torchvision
@@ -281,16 +282,21 @@ def train(cfg):
     num_epochs = cfg["TRAINING"]["EPOCHS"]
 
     for epoch in range(1, num_epochs + 1):
+        epoch_start = time.time()
+
         avg_recon, avg_kl, avg_perceptual, avg_adv, phase_desc = train_one_epoch(
             model, discriminator, perceptual_loss_fn,
             train_loader, model_optimizer, disc_optimizer,
             epoch, cfg, device,
         )
 
+        epoch_minutes = (time.time() - epoch_start) / 60.0
+
         print(
             f"== Epoch {epoch}/{num_epochs} done | phase={phase_desc} | "
             f"avg_recon={avg_recon:.4f} avg_kl={avg_kl:.4f} "
-            f"avg_perceptual={avg_perceptual:.4f} avg_adv={avg_adv:.4f} =="
+            f"avg_perceptual={avg_perceptual:.4f} avg_adv={avg_adv:.4f} | "
+            f"time={epoch_minutes:.2f} min =="
         )
 
         # ---- Per-epoch qualitative sample grid from a fixed latent ----
