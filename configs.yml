@@ -5,7 +5,7 @@ MODEL:
   CLASS_EMBEDDING_DIM: 256
   NUM_CLASSES: 10
   IMAGE_SIDE_LENGTH: 32
-  CHANNELS_PER_LEVEL: [128, 256, 384, 512]   # [c1, c2, c3, c4] channel widths per resolution
+  CHANNELS_PER_LEVEL: [256, 384, 384, 512]   # [c1, c2, c3, c4] channel widths per resolution
   NUM_GROUPS: 32
   LATENT_CHANNELS: 16          # latent spatial map is (LATENT_CHANNELS, H/8, W/8) -- 16x4x4 for 32x32 images
 
@@ -45,8 +45,8 @@ TRAINING:
 ## Phase 3 [PHASE2_END_EPOCH+1 .. EPOCHS]               -> + adversarial
 ## ============================================================
 LOSS:
-  PHASE1_END_EPOCH: 23
-  PHASE2_END_EPOCH: 46
+  PHASE1_END_EPOCH: 25
+  PHASE2_END_EPOCH: 50
   KL_WEIGHT: 0.001              # weight on the KL term added to the reconstruction loss; tune to taste
   PERCEPTUAL_WEIGHT: 0.1
   ADVERSARIAL_WEIGHT: 0.05
