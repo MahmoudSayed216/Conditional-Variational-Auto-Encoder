@@ -318,7 +318,7 @@ def train(cfg):
         print("No checkpoint found -- starting training from scratch.")
 
     num_epochs = cfg["TRAINING"]["EPOCHS"]
-
+    print("One Training")
     for epoch in range(start_epoch, num_epochs + 1):
         epoch_start = time.time()
 
@@ -378,6 +378,7 @@ def train(cfg):
 
 
 def main():
+    
     cfg = load_config("configs.yml")
     train(cfg)
 

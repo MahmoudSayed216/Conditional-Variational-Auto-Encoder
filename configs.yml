@@ -65,6 +65,6 @@ SAMPLING:
 ## ============================================================
 EVAL:
   COMPUTE_FID_IS: true
-  FID_EVERY_N_EPOCHS: 5          # periodic, cheap-ish tracking estimate
+  FID_EVERY_N_EPOCHS: 10          # periodic, cheap-ish tracking estimate
   FID_NUM_SAMPLES: 1000          # sample count used for the periodic estimate
   FINAL_FID_NUM_SAMPLES: 5000   # sample count used for the final, reported number
