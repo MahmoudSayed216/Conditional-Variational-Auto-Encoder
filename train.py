@@ -37,6 +37,30 @@ def load_config(path="configs.yml"):
         return yaml.safe_load(f)
 
 
+def find_latest_checkpoint(checkpoint_dir):
+    """Returns the path to the highest-epoch 'vae_epoch_*.pt' checkpoint in
+    checkpoint_dir, or None if the directory doesn't exist or has none.
+    """
+    if not os.path.isdir(checkpoint_dir):
+        return None
+
+    def epoch_num(fname):
+        try:
+            return int(fname[len("vae_epoch_"):-len(".pt")])
+        except ValueError:
+            return -1
+
+    ckpts = [
+        f for f in os.listdir(checkpoint_dir)
+        if f.startswith("vae_epoch_") and f.endswith(".pt")
+    ]
+    if not ckpts:
+        return None
+
+    ckpts.sort(key=epoch_num)
+    return os.path.join(checkpoint_dir, ckpts[-1])
+
+
 def get_loss_weights(epoch, loss_cfg):
     """Returns (perceptual_weight, adversarial_weight) active at this epoch (1-indexed)."""
     perceptual_weight = 0.0
@@ -279,9 +303,23 @@ def train(cfg):
         model.train()
         return samples
 
+    # ---- Resume from the latest checkpoint, if one exists ----
+    start_epoch = 1
+    latest_ckpt_path = find_latest_checkpoint(cfg["TRAINING"]["CHECKPOINT_DIR"])
+    if latest_ckpt_path is not None:
+        checkpoint = torch.load(latest_ckpt_path, map_location=device)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        discriminator.load_state_dict(checkpoint["discriminator_state_dict"])
+        model_optimizer.load_state_dict(checkpoint["model_optimizer_state_dict"])
+        disc_optimizer.load_state_dict(checkpoint["disc_optimizer_state_dict"])
+        start_epoch = checkpoint["epoch"] + 1
+        print(f"Resumed from checkpoint {latest_ckpt_path} (epoch {checkpoint['epoch']}) -> continuing at epoch {start_epoch}")
+    else:
+        print("No checkpoint found -- starting training from scratch.")
+
     num_epochs = cfg["TRAINING"]["EPOCHS"]
 
-    for epoch in range(1, num_epochs + 1):
+    for epoch in range(start_epoch, num_epochs + 1):
         epoch_start = time.time()
 
         avg_recon, avg_kl, avg_perceptual, avg_adv, phase_desc = train_one_epoch(
