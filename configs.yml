@@ -5,7 +5,7 @@ MODEL:
   CLASS_EMBEDDING_DIM: 256
   NUM_CLASSES: 10
   IMAGE_SIDE_LENGTH: 32
-  CHANNELS_PER_LEVEL: [256, 256, 384, 512]   # [c1, c2, c3, c4] channel widths per resolution
+  CHANNELS_PER_LEVEL: [256, 384, 384, 512]   # [c1, c2, c3, c4] channel widths per resolution
   NUM_GROUPS: 32
   LATENT_CHANNELS: 16          # latent spatial map is (LATENT_CHANNELS, H/8, W/8) -- 16x4x4 for 32x32 images
 
@@ -26,7 +26,7 @@ DATA:
 ## TRAINING
 ## ============================================================
 TRAINING:
-  EPOCHS: 70
+  EPOCHS: 90
   LR: 0.0002
   DISCRIMINATOR_LR: 0.0002
   OPTIMIZER: "adam"
